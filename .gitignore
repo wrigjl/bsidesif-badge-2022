@@ -1,8 +1,6 @@
 # Specific badge files we don't want published... like our credentials. :-)
 secrets.py
 
-
-
 # Compiled source #
 ###################
 *.com

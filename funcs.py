@@ -6,7 +6,13 @@ import secrets
 import urandom
 
 bit_depth = 5
-np = neopixel.NeoPixel(Pin(4), 3)
+num_neo_pixels = 3
+np = neopixel.NeoPixel(Pin(4), num_neo_pixels)
+
+def clear_pix(np, numpix):
+    for i in range(numpix):
+        np[i] = (0, 0, 0)
+    np.write()
 
 def pixel(np, parr1, parr2, parr3):
     np[0] = (parr1[0], parr1[1], parr1[2] )

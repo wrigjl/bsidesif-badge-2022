@@ -1,3 +1,3 @@
 # Modify me with values for your network...
-SSID = 'some_ssid_here'
-PASSWORD = 'some_password_here'
+SSID = 'New_Value'
+PASSWORD = 'Test_Value'

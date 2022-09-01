@@ -2,9 +2,9 @@
 All the badge things
 
 For WIFI credentials, the current code expects a secrets.py file with at least two lines for the SSID and PASSWORD variables (case sensitive)
-The following 3 lines are an example of mine:
-'''
-# Modify me with values for your network...
-SSID = 'New_Value'</br>
-PASSWORD = 'Test_Value'
-'''
+
+# Example secrets.py file contents:
+#Modify me with values for your network...</br>
+SSID = 'SSID_Value'</br>
+PASSWORD = 'Password_Value'
+

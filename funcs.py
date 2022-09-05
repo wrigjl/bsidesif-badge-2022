@@ -40,7 +40,7 @@ def conn():
     wlan.active(True)
     wlan.connect(secrets.SSID, secrets.PASSWORD)
     print(wlan.isconnected())
-    return 0
+    return wlan
 
 # Cycle a pin several times to identify if it works properly...
 def test_pin(num):
@@ -51,6 +51,14 @@ def test_pin(num):
         pin_num.on()
         time.sleep(.25)
 
-def set_cols(col_arr):
+def set_colors(color_arr):
     request = urequests.put("http://game.ifhacker.org/update")
 
+def main_func():
+    print(f'This is not supposed to run as a main module...')
+
+if __name__ == "__main__":
+   print("Executed when ran directly")
+   main_func()
+else:
+   print("Executed when imported")

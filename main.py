@@ -9,7 +9,7 @@ def main_func():
         wlan = funcs.conn()
     if wlan.isconnected() == False:
         print(f'wlan is not connected')
-        wlan = funcs.conn()
+        wlan = wlan.connect()
     
 
 def test_func():

@@ -2,6 +2,8 @@ import funcs
 import time
 import spectre
 
+polling_time = 30
+polling_clock = polling_time * 1000
 
 def main_func():
     if 'wlan' not in locals():
@@ -24,9 +26,13 @@ def test_func():
 
 if __name__ == "__main__":
     print("Executed when ran directly")
+    that_time = time.ticks_ms()
     while True:
         main_func()
         spectre.main_loop()
         test_func()
+        if time.ticks_diff(time.ticks_ms(), that_time) > polling_clock:
+            that_time = time.ticks_ms()
+            print(f'{polling_time} seconds have elapsed, time to check into the web server')
 else:
    print("Executed when imported")

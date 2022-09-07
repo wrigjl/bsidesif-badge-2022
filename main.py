@@ -1,5 +1,5 @@
-import funcs
 import time
+import funcs
 import spectre
 
 polling_time = 30
@@ -12,16 +12,14 @@ def main_func():
     if wlan.isconnected() == False:
         print(f'wlan is not connected')
         wlan = wlan.connect()
-    
 
 def test_func():
     countz = 0
     while True:
         print(f'Loop iteration {countz}')
         funcs.npix_ran(funcs.np)
-        time.sleep(.25)
         countz += 1
-        if countz == 15:
+        if countz == 5:
             return 0
 
 if __name__ == "__main__":

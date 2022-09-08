@@ -89,4 +89,4 @@ if __name__ == "__main__":
    print("Executed when ran directly")
    main_func()
 else:
-   print("Executed when imported")
+   pass

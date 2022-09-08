@@ -33,7 +33,6 @@ def test_func():
             return 0
 
 if __name__ == "__main__":
-    print("Executed when ran directly")
     that_time = time.ticks_ms()
     butt_counter = 0
     counter = 0
@@ -43,7 +42,7 @@ if __name__ == "__main__":
         if counter % 5000 == 0:
             wlan = test_wireless(wlan)
         if counter % 15000 == 0:
-            print(f'15k counter passed')
+            pass
         spectre.main_loop()
         # test_func()
         if time.ticks_diff(time.ticks_ms(), that_time) > polling_clock:

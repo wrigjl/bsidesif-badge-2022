@@ -35,12 +35,15 @@ def start_loop(coms: api.Coms, badge: pixel.Badge):
         time.sleep_ms(polling_clock)
 
 
-if __name__ == '__main__':
+def start_main():
     wlan = fu.conn()
     uid = fu.get_uuid()
     print("My UUID: {}".format(uid))
     badge = pixel.Badge(fu.np)
     coms = api.Coms(uid, badge)
     coms.add_prediction_state("255,128,255", "255,128,255", "255,128,255")
-
     start_loop(coms, badge)
+
+
+if __name__ == '__main__':
+    start_main()

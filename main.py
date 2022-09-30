@@ -3,7 +3,6 @@ import time
 import api
 import funcs as fu
 import pixel
-import utils
 
 polling_time = 5
 polling_clock = polling_time * 1000
@@ -38,7 +37,7 @@ def start_loop(coms: api.Coms, badge: pixel.Badge):
 
 if __name__ == '__main__':
     wlan = fu.conn()
-    uid = utils.get_uuid()
+    uid = fu.get_uuid()
     print("My UUID: {}".format(uid))
     badge = pixel.Badge(fu.np)
     coms = api.Coms(uid, badge)

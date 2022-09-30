@@ -33,8 +33,8 @@ class Coms:
         self.store(resp["token"])
         return resp["token"]
 
-    def click(self):
-        """Simulate clicking button on badge"""
+    def press(self):
+        """Button on badge being pressed. Used to participate in event."""
         token = self.fetch()
         if not token or len(token) < 1:
             token = self.register()
@@ -98,7 +98,6 @@ class Coms:
         uid = self.uid
         if store_file is None:
             store_file = "tokens.json"
-        data = {}
         file = open(store_file, "r")
         data = json.load(file)
         data[uid] = token
@@ -106,14 +105,6 @@ class Coms:
         file = open(store_file, "w")
         file.write(json.dumps(data))
         file.close()
-        # with open(store_file, "r") as file:
-        #     try:
-        #         data = json.load(file)
-        #     except Exception as e:
-        #         data = {}
-        # data[uid] = token
-        # with open(store_file, "w") as file:
-        #     file.write(json.dumps(data))
         return True
 
     def add_prediction_state(self, p0, p1, p2):

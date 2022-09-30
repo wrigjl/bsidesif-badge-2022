@@ -14,10 +14,10 @@ echo "
 
 echo "******** CHIP ID **********"
 read -n 1 -s -r -p "Please reset board now, after press any key to continue"
-esptool.py --port /dev/ttyUSB0 chip_id
+esptool.py --port /dev/tty.usbserial-10 chip_id
 echo "******** Erase Flash **********"
 read -n 1 -s -r -p "Please reset board now, after press any key to continue"
-esptool.py --port /dev/ttyUSB0 erase_flash
+esptool.py --port /dev/tty.usbserial-10 erase_flash
 echo "******** FLASH CHIP **********"
 read -n 1 -s -r -p "Please reset board now, after press any key to continue"
-esptool.py --port /dev/ttyUSB0 --baud 460800 write_flash --flash_size=detect 0  ./firmware/esp8266-20220117-v1.18.bin
+esptool.py --port /dev/tty.usbserial-10 --baud 460800 write_flash --flash_size=detect 0  ./firmware/esp8266-20220117-v1.18.bin

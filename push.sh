@@ -10,4 +10,4 @@ ampy --port /dev/tty.usbserial-10 put main.py
 ampy --port /dev/tty.usbserial-10 put spectre.py
 ampy --port /dev/tty.usbserial-10 put secrets.py
 echo "Now copying primitives... may take a while"
-ampy --port /dev/tty.usbserial-10 put primitives
+#ampy --port /dev/tty.usbserial-10 put primitives

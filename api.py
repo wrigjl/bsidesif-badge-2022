@@ -1,5 +1,14 @@
 import ujson as json
-import urequests as requests
+from urequests import post as r_post
+from urequests import get as r_get
+import urandom
+import neopixel
+from machine import Pin
+
+
+num_neo_pixels = 3
+neop = neopixel.NeoPixel(Pin(4), num_neo_pixels)
+button = Pin(0)
 
 
 class Coms:
@@ -8,20 +17,65 @@ class Coms:
     REGISTER_ENDPOINT = "/api/unregister/{uid}"
     EVENT_PARTICIPATE_ENDPOINT = "/pull-lever/{uid}"
 
-    def __init__(self, uid, badge, badge_server=None, token=None):
+    def __init__(self, uid, badge_server=None, token=None):
         self.uid = uid
         self.token = token
-        self.badge = badge
         self.request = {}
         self.badge_server = badge_server if badge_server is not None else "https://ifhacker.meecles.net"
         self.auto_prediction = False
         self.custom_name = None
         self.prediction = []
 
+        # For use with LED updates
+        global neop
+        self.np = neop
+        self.display_colors = {
+            'red': (255, 0, 0), 'green': (0, 255, 0), 'blue': (0, 0, 255),
+            'yellow': (245, 255, 0), 'purple': (255, 0, 255), 'orange': (250, 225, 0),
+            'magenta': (255, 0, 20), 'teal': (0, 250, 120)
+        }
+
+    def _to_pix_color(self, color):
+        # Reduce brightness and memory footprint
+        divis = 5
+        return int(color[0] / divis), int(color[1] / divis), int(color[2] / divis)
+
+    def get_random_colors(self, event_colors=None):
+        if event_colors:
+            return (
+                event_colors[0]["name"],
+                event_colors[1]["name"],
+                event_colors[2]["name"]
+            )
+        for i in range(0, 3):
+            r = urandom.getrandbits(3)
+            n = 0
+            for color in self.display_colors:
+                if r == n:
+                    yield color
+                n += 1
+
+    def colors_to_rgb(self, c1, c2, c3):
+        return [
+            # Convert tuples into lists for use with API
+            [c for c in self.display_colors[c1]],
+            [c for c in self.display_colors[c2]],
+            [c for c in self.display_colors[c3]]
+        ]
+
+    def set_pixels(self, c1, c2, c3, write=False):
+        self.np[0] = self._to_pix_color(self.display_colors[c1])
+        self.np[1] = self._to_pix_color(self.display_colors[c2])
+        self.np[2] = self._to_pix_color(self.display_colors[c3])
+        if write:
+            self.write_pixels()
+
+    def write_pixels(self):
+        self.np.write()
+
     def gc(self):
         self.prediction = []
         self.custom_name = None
-        self.request = {}
 
     def set_url(self, url):
         self.badge_server = url
@@ -36,7 +90,7 @@ class Coms:
 
     def register(self) -> str:
         url = "{}{}".format(self.badge_server, self.REGISTER_ENDPOINT.format(uid=self.uid))
-        x = requests.post(url)
+        x = r_post(url)
         resp = x.json()
         if "success" not in resp or not resp["success"]:
             return ""
@@ -55,7 +109,7 @@ class Coms:
             self.request["token"] = token
         url = "{}{}".format(self.badge_server, self.EVENT_PARTICIPATE_ENDPOINT.format(uid=self.uid))
         print("Request: \n{}".format(json.dumps(self.request)))
-        x = requests.get(url, json=self.request)
+        x = r_get(url, json=self.request)
         resp = x.json()
         print("Response: \n{}".format(json.dumps(resp)))
 
@@ -84,7 +138,7 @@ class Coms:
         url = "{}{}".format(self.badge_server, self.INGEST_ENDPOINT.format(self.uid))
         print("Request: \n{}".format(json.dumps(self.request)))
         try:
-            x = requests.post(url, json=self.request)
+            x = r_post(url, json=self.request)
             resp = x.json()
             print(resp)
             if resp["success"]:
@@ -93,7 +147,7 @@ class Coms:
                 if badge_write:
                     event_colors = resp["leds"] if resp["event_active"] else None
                     if resp["event_active"] and event_colors:
-                        self.badge.set_pixels(
+                        self.set_pixels(
                             event_colors[0]["name"],
                             event_colors[1]["name"],
                             event_colors[2]["name"],

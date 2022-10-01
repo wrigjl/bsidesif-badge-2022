@@ -3,8 +3,91 @@
 # Copyright (c) 2018-2022 Peter Hinch
 # Released under the MIT License (MIT) - see LICENSE file
 
-import uasyncio as asyncio
-from . import launch, Delay_ms
+from uasyncio import create_task, sleep_ms, Event, ThreadSafeFlag
+from utime import ticks_add, ticks_diff, ticks_ms
+
+
+class Delay_ms:
+
+    class DummyTimer:  # Stand-in for the timer class. Can be cancelled.
+        def cancel(self):
+            pass
+    _fake = DummyTimer()
+
+    def __init__(self, func=None, args=(), duration=1000):
+        self._func = func
+        self._args = args
+        self._durn = duration  # Default duration
+        self._retn = None  # Return value of launched callable
+        self._tend = None  # Stop time (absolute ms).
+        self._busy = False
+        self._trig = ThreadSafeFlag()
+        self._tout = Event()  # Timeout event
+        self.wait = self._tout.wait  # Allow: await wait_ms.wait()
+        self.clear = self._tout.clear
+        self.set = self._tout.set
+        self._ttask = self._fake  # Timer task
+        self._mtask = create_task(self._run()) #Main task
+
+    async def _run(self):
+        while True:
+            await self._trig.wait()  # Await a trigger
+            self._ttask.cancel()  # Cancel and replace
+            await sleep_ms(0)
+            dt = max(ticks_diff(self._tend, ticks_ms()), 0)  # Beware already elapsed.
+            self._ttask = asyncio.create_task(self._timer(dt))
+
+    async def _timer(self, dt):
+        await asyncio.sleep_ms(dt)
+        self._tout.set()  # Only gets here if not cancelled.
+        self._busy = False
+        if self._func is not None:
+            self._retn = launch(self._func, self._args)
+
+# API
+    # trigger may be called from hard ISR.
+    def trigger(self, duration=0):  # Update absolute end time, 0-> ctor default
+        if self._mtask is None:
+            raise RuntimeError("Delay_ms.deinit() has run.")
+        self._tend = ticks_add(ticks_ms(), duration if duration > 0 else self._durn)
+        self._retn = None  # Default in case cancelled.
+        self._busy = True
+        self._trig.set()
+
+    def stop(self):
+        self._ttask.cancel()
+        self._ttask = self._fake
+        self._busy = False
+        self._tout.clear()
+
+    def __call__(self):  # Current running status
+        return self._busy
+
+    running = __call__
+
+    def rvalue(self):
+        return self._retn
+
+    def callback(self, func=None, args=()):
+        self._func = func
+        self._args = args
+
+    def deinit(self):
+        self.stop()
+        self._mtask.cancel()
+        self._mtask = None
+
+
+async def _g():
+    pass
+type_coro = type(_g())
+
+
+def launch(func, tup_args):
+    res = func(*tup_args)
+    if isinstance(res, type_coro):
+        res = create_task(res)
+    return res
 
 
 class Pushbutton:
@@ -24,14 +107,14 @@ class Pushbutton:
         self._dd = False  # Ditto for doubleclick
         # Convert from electrical to logical value
         self._state = self.rawstate()  # Initial state
-        self._run = asyncio.create_task(self._go())  # Thread runs forever
+        self._run = create_task(self._go())  # Thread runs forever
 
     async def _go(self):
         while True:
             self._check(self.rawstate())
             # Ignore state changes until switch has settled. Also avoid hogging CPU.
             # See https://github.com/peterhinch/micropython-async/issues/69
-            await asyncio.sleep_ms(Pushbutton.debounce_ms)
+            await sleep_ms(Pushbutton.debounce_ms)
 
     def _check(self, state):
         if state == self._state:
@@ -76,19 +159,19 @@ class Pushbutton:
     # ****** API ******
     def press_func(self, func=False, args=()):
         if func is None:
-            self.press = asyncio.Event()
+            self.press = Event()
         self._tf = self.press.set if func is None else func
         self._ta = args
 
     def release_func(self, func=False, args=()):
         if func is None:
-            self.release = asyncio.Event()
+            self.release = Event()
         self._ff = self.release.set if func is None else func
         self._fa = args
 
     def double_func(self, func=False, args=()):
         if func is None:
-            self.double = asyncio.Event()
+            self.double = Event()
             func = self.double.set
         self._df = func
         self._da = args
@@ -100,7 +183,7 @@ class Pushbutton:
 
     def long_func(self, func=False, args=()):
         if func is None:
-            self.long = asyncio.Event()
+            self.long = Event()
             func = self.long.set
         if func:
             if self._ld:

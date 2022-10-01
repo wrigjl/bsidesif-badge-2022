@@ -1,14 +1,28 @@
 import uasyncio as asyncio
 
-import api
 import funcs as fu
 import pixel
+import api
+import gc
+
+#import test
+
+# Need to reduce memory footprint to start using buttons...
+# Total bytes of memory to work with: 36,656
+# Bytes free after network / LED module 20,656 (16kb used)
+# Bytes free after using pushbutton library (test.py uses this): 12,256 (24,400kb used)
+# 16kb + 24.4kb > 36kb...
+# Bummer because pushbutton library was nice
+# Either reduce network module to < 12kb, reduce pushbutton library to < 20kb
+# or build new pushbutton library which uses less than 20kb
+# Will still need some overhead for communication between modules (e.g. badge modes)
+# In summary...
+# LIBRARY TOO CHONKY... detecting if a button is pressed is larger than the entire network module????
+# time to re-implement unless memory footprint of library (or my code, or both!) can be reduced by ~5kb
+# Might have to forgo short, double and long presses, and only have a basic short/long implementation
 
 polling_time = 5
 polling_clock = polling_time * 1000
-long_press = 2
-long_clock = long_press * 1000
-debounce = 20
 
 
 def test_wireless(wlan, counter=0):
@@ -19,10 +33,6 @@ def test_wireless(wlan, counter=0):
         print('wlan is not connected {}'.format("" if counter == 0 else counter))
         wlan.connect()
     return wlan
-
-
-def normal_click():
-    print("Normal click detected")
 
 
 async def start_loop(coms: api.Coms, badge: pixel.Badge):
@@ -47,9 +57,18 @@ async def start_main():
     coms = api.Coms(uid, badge)
     coms.badge_init()
     coms.add_prediction_state("255,128,255", "255,128,255", "255,128,255")
+    #asyncio.create_task(test.btn1())
     asyncio.create_task(start_loop(coms, badge))
+
+    # For some reason uncommenting this and the corresponding import
+    # causes a crash
+    # if I run test.py directly, it functions just fine.
+    # ????
     while True:
-        await asyncio.sleep_ms(100)
+        await asyncio.sleep_ms(5000)
+        gc.collect()
+        mem = gc.mem_free()
+        print(f"{mem} bytes free")  # Print required so watchdog doesn't time out, so lets print memory free
 
 
 if __name__ == '__main__':

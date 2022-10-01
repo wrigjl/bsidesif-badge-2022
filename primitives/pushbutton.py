@@ -4,7 +4,6 @@
 # Released under the MIT License (MIT) - see LICENSE file
 
 import uasyncio as asyncio
-import utime as time
 from . import launch, Delay_ms
 
 try:

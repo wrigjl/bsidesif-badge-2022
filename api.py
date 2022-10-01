@@ -19,6 +19,11 @@ class Coms:
         self.is_async = False
         self.prediction = []
 
+    def gc(self):
+        self.prediction = []
+        self.custom_name = None
+        self.request = {}
+
     def set_url(self, url):
         self.badge_server = url
 
@@ -98,12 +103,15 @@ class Coms:
                             event_colors[2]["name"],
                             write=True
                         )
+                self.gc()
                 return resp
             reason = resp["reason"] if "reason" in resp else None
             print("Failed to update led status: {}".format(reason) if reason else "Failed to update led.")
+            self.gc()
             return resp
         except Exception as e:
             print(f"Server didn't respond. Defaulting to something else")
+            self.gc()
             return {"event_active": False}
 
     def fetch(self, store_file=None) -> str:
@@ -159,7 +167,9 @@ class Coms:
         return self.prediction
 
     def _add_prediction(self):
-        self.request["prediction"] = self._load_prediction()
+        pre = self._load_prediction()
+        if pre and len(pre) > 0:
+            self.request["prediction"] = pre
 
     def set_name(self, name):
         self.custom_name = name

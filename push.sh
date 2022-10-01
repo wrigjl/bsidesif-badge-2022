@@ -1,39 +1,6 @@
 #!/bin/bash
 
-DEVICE='/dev/ttyUSB0'
-Json='false'
-DFLAG='false'
-
-while getopts 'jf:' flag
-do
-    case "${flag}" in
-        f)
-        DEVICE=$OPTARG
-        DFLAG='true'
-        ;;
-        j) Json='true' ;;
-        ?)
-        echo "Bad arguments supplied"
-        echo "Run as push.sh <-j>  -f [DEVICE_HANDLE]"
-        exit 1
-        ;;
-    esac
-done
-shift "$(($OPTIND -1))"
-
-if [ "$Json" = true ]
-  then
-    echo "Pushing tokens.json to $DEVICE"
-    ampy --port $DEVICE put tokens.json
-  else
-    echo "skipped tokens.json"
-fi
-
-if [ "$DFLAG" = false ]
-  then
-    echo "No device supplied"
-    echo "Running with default device handle of $DEVICE"
-fi
+DEVICE=$1
 
 echo "Starting copy to $DEVICE"
 ampy --port $DEVICE put funcs.py

@@ -1,5 +1,5 @@
 import uasyncio as asyncio
-import funcs as fu
+from machine import Pin
 from primitives.pushbutton import Pushbutton
 
 
@@ -8,7 +8,7 @@ def click(msg="SHORT"):
 
 
 async def btn1():
-    button = fu.button_pin
+    button = Pin(0)
     pb = Pushbutton(button, suppress=True)
 
     pb.release_func(click, ("SHORT",))

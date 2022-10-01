@@ -1,16 +1,10 @@
-import time
-
-import neopixel
 import network
 import ubinascii
-from machine import Pin
+# from machine import Pin
 
 import secrets
 
-button_pin = Pin(0)
-bit_depth = 5
-num_neo_pixels = 3
-np = neopixel.NeoPixel(Pin(4), num_neo_pixels)
+# button_pin = Pin(0)
 
 # Updating neopixel values has been moved to pixel.py
 
@@ -23,12 +17,6 @@ def get_uuid():
     return "ebc626d8-6ddb-437c-8210-{}".format(mac)
 
 
-def clear_pix(np, numpix):
-    for i in range(numpix):
-        np[i] = (0, 0, 0)
-    np.write()
-
-
 def conn():
     wlan = network.WLAN(network.STA_IF)
     wlan.active(True)
@@ -38,10 +26,10 @@ def conn():
 
 
 # Cycle a pin several times to identify if it works properly...
-def test_pin(num):
-    pin_num = Pin(num, Pin.OUT)
-    for each in range(10):
-        pin_num.off()
-        time.sleep(.25)
-        pin_num.on()
-        time.sleep(.25)
+# def test_pin(num):
+#     pin_num = Pin(num, Pin.OUT)
+#     for each in range(10):
+#         pin_num.off()
+#         time.sleep(.25)
+#         pin_num.on()
+#         time.sleep(.25)

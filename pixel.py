@@ -1,28 +1,44 @@
 import urandom
+import neopixel
+from machine import Pin
+
+num_neo_pixels = 3
+neop = neopixel.NeoPixel(Pin(4), num_neo_pixels)
 
 
 class Badge:
 
-    def __init__(self, np):
-        self.np = np
-        self.pix_colors = {
-            'red': (65, 0, 0), 'green': (0, 65, 0), 'blue': (0, 0, 65), 'yellow': (45, 55, 0),
-            'purple': (65, 0, 65), 'magenta': (25, 0, 20), 'teal': (0, 25, 12), 'orange': (25, 10, 0)
-        }
+    def __init__(self):
+        global neop
+        self.np = neop
         self.display_colors = {
-            'red': (255, 0, 0), 'green': (0, 255, 0), 'blue': (0, 0, 255), 'yellow': (245, 255, 0),
-            'purple': (255, 0, 255), 'orange': (250, 225, 0), 'magenta': (255, 0, 20), 'teal': (0, 250, 120)
+            'red': (255, 0, 0), 'green': (0, 255, 0), 'blue': (0, 0, 255),
+            'yellow': (245, 255, 0), 'purple': (255, 0, 255), 'orange': (250, 225, 0),
+            'magenta': (255, 0, 20), 'teal': (0, 250, 120)
         }
-        self.color_array = [c for c in self.pix_colors]
         self.c1 = None
         self.c2 = None
         self.c3 = None
 
+    def _to_pix_color(self, color):
+        # Reduce brightness and memory footprint
+        divis = 5
+        return int(color[0] / divis), int(color[1] / divis), int(color[2] / divis)
+
     def get_random_colors(self, event_colors=None):
-        c1 = self.color_array[urandom.getrandbits(3)] if not event_colors else event_colors[0]["name"]
-        c2 = self.color_array[urandom.getrandbits(3)] if not event_colors else event_colors[1]["name"]
-        c3 = self.color_array[urandom.getrandbits(3)] if not event_colors else event_colors[2]["name"]
-        return c1, c2, c3
+        if event_colors:
+            return (
+                event_colors[0]["name"],
+                event_colors[1]["name"],
+                event_colors[2]["name"]
+            )
+        for i in range(0, 3):
+            r = urandom.getrandbits(3)
+            n = 0
+            for color in self.display_colors:
+                if r == n:
+                    yield color
+                n += 1
 
     def colors_to_rgb(self, c1, c2, c3):
         return [
@@ -40,7 +56,12 @@ class Badge:
             self.write_pixels()
 
     def write_pixels(self):
-        self.np[0] = self.pix_colors[self.c1]
-        self.np[1] = self.pix_colors[self.c2]
-        self.np[2] = self.pix_colors[self.c3]
+        self.np[0] = self._to_pix_color(self.display_colors[self.c1])
+        self.np[1] = self._to_pix_color(self.display_colors[self.c2])
+        self.np[2] = self._to_pix_color(self.display_colors[self.c3])
+        self.np.write()
+
+    def clear_pix(self, numpix):
+        for i in range(numpix):
+            self.np[i] = (0, 0, 0)
         self.np.write()

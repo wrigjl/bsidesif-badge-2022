@@ -117,22 +117,20 @@ class Coms:
         uid = self.uid
         if store_file is None:
             store_file = "tokens.json"
-        file = open(store_file, "r")
-        data = json.load(file)
-        return data[uid] if uid in data else ""
+        with open(store_file, "r") as file:
+            data = json.load(file)
+            return data[uid] if uid in data else ""
 
     def store(self, token, store_file=None):
         """Store received token associated with a UID"""
         uid = self.uid
         if store_file is None:
             store_file = "tokens.json"
-        file = open(store_file, "r")
-        data = json.load(file)
-        data[uid] = token
-        file.close()
-        file = open(store_file, "w")
-        file.write(json.dumps(data))
-        file.close()
+        with open(store_file, "r") as file:
+            data = json.load(file)
+            data[uid] = token
+        with open(store_file, "w") as file:
+            file.write(json.dumps(data))
         return True
 
     def add_prediction_state(self, p0, p1, p2):

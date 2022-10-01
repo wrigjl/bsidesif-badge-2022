@@ -8,18 +8,30 @@ class Coms:
     REGISTER_ENDPOINT = "/api/unregister/{uid}"
     EVENT_PARTICIPATE_ENDPOINT = "/pull-lever/{uid}"
 
-    def __init__(self, uid, badge, badge_server=None):
+    def __init__(self, uid, badge, badge_server=None, token=None):
         self.uid = uid
-        self.token = None
+        self.token = token
         self.badge = badge
         self.request = {}
         self.badge_server = badge_server if badge_server is not None else "https://ifhacker.meecles.net"
         self.auto_prediction = False
         self.custom_name = None
+        self.is_async = False
         self.prediction = []
 
     def set_url(self, url):
         self.badge_server = url
+
+    def set_async(self, is_async=True):
+        self.is_async = is_async
+
+    def badge_init(self):
+        token = self.fetch()
+        if token is None or len(token) < 1:
+            print("No token stored, require registration")
+            token = self.register()
+        print("Loaded token!")
+        self.token = token
 
     def register(self) -> str:
         url = "{}{}".format(self.badge_server, self.REGISTER_ENDPOINT.format(uid=self.uid))
@@ -46,7 +58,7 @@ class Coms:
         resp = x.json()
         print("Response: \n{}".format(json.dumps(resp)))
 
-    def update_led_state(self, led0: list, led1: list, led2: list, badge_write=False):
+    def update_led_state(self, led0: list, led1: list, led2: list, badge_write=False, web_write=False):
         """LED Format [r: int, g: int, b: int]"""
         self.request = {
             "leds": [
@@ -55,19 +67,25 @@ class Coms:
                 {"rgb": led2}
             ]
         }
-        token = self.fetch()
+        token = self.token
         if not token or len(token) < 1:
-            print("No token found, attempting registration")
-            token = self.register()
+            print("No token found.. request miss")
         if token:
             self.request["token"] = token
         self._add_prediction()
         self._add_name()
+        print("Stored LED state")
+        if web_write:
+            return self.write_led_state(badge_write=badge_write)
+        return {}
+
+    def write_led_state(self, badge_write=False):
         url = "{}{}".format(self.badge_server, self.INGEST_ENDPOINT.format(self.uid))
         print("Request: \n{}".format(json.dumps(self.request)))
         try:
             x = requests.post(url, json=self.request)
             resp = x.json()
+            print(resp)
             if resp["success"]:
                 print("Updated LED status for: {}".format(self.uid))
                 print("Server response: \n{}".format(json.dumps(resp)))
@@ -90,6 +108,11 @@ class Coms:
 
     def fetch(self, store_file=None) -> str:
         """fetch token associated with a UID"""
+        if self.token is not None:
+            return self.token
+        if self.is_async:
+            print("[WARNING] attempting file I/O in async task")
+            return ""
         uid = self.uid
         if store_file is None:
             store_file = "tokens.json"
@@ -100,6 +123,9 @@ class Coms:
     def store(self, token, store_file=None):
         """Store received token associated with a UID"""
         uid = self.uid
+        if self.is_async:
+            print("[WARNING] attempting file I/O in async task")
+            return ""
         if store_file is None:
             store_file = "tokens.json"
         file = open(store_file, "r")

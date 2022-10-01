@@ -1,8 +1,10 @@
+import uasyncio as asyncio
 import time
 
 import api
 import funcs as fu
 import pixel
+from primitives.pushbutton import Pushbutton
 
 polling_time = 5
 polling_clock = polling_time * 1000
@@ -21,7 +23,35 @@ def test_wireless(wlan, counter=0):
     return wlan
 
 
-def start_loop(coms: api.Coms, badge: pixel.Badge):
+def double_click():
+    print("double click detected")
+
+
+def long_click():
+    print("Long click detected")
+
+
+def normal_click():
+    print("Normal click detected")
+
+
+async def button_handler():
+    button = fu.button_pin
+    pb = Pushbutton(button, suppress=True)
+    # pb.double_func(double_click, ())
+    # pb.long_func(long_click, ())
+    pb.press_func(normal_click, ())
+    while True:
+        yield 1
+
+
+async def start_led_handler():
+    wlan = fu.conn()
+    uid = fu.get_uuid()
+    print("My UUID: {}".format(uid))
+    badge = pixel.Badge(fu.np)
+    coms = api.Coms(uid, badge)
+    coms.add_prediction_state("255,128,255", "255,128,255", "255,128,255")
     start_time = time.ticks_ms()
     event_colors = None
     while True:
@@ -32,18 +62,10 @@ def start_loop(coms: api.Coms, badge: pixel.Badge):
         if not response["event_active"]:
             badge.write_pixels()
             event_colors = response["leds"] if response["event_active"] else None
-        time.sleep_ms(polling_clock)
-
-
-def start_main():
-    wlan = fu.conn()
-    uid = fu.get_uuid()
-    print("My UUID: {}".format(uid))
-    badge = pixel.Badge(fu.np)
-    coms = api.Coms(uid, badge)
-    coms.add_prediction_state("255,128,255", "255,128,255", "255,128,255")
-    start_loop(coms, badge)
+        await asyncio.sleep_ms(polling_clock)
+        yield 1
 
 
 if __name__ == '__main__':
-    start_main()
+    asyncio.run(button_handler())
+    asyncio.run(start_led_handler())

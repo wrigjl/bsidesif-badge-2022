@@ -65,24 +65,28 @@ class Coms:
         self._add_name()
         url = "{}{}".format(self.badge_server, self.INGEST_ENDPOINT.format(self.uid))
         print("Request: \n{}".format(json.dumps(self.request)))
-        x = requests.post(url, json=self.request)
-        resp = x.json()
-        if resp["success"]:
-            print("Updated LED status for: {}".format(self.uid))
-            print("Server response: \n{}".format(json.dumps(resp)))
-            if badge_write:
-                event_colors = resp["leds"] if resp["event_active"] else None
-                if resp["event_active"] and event_colors:
-                    self.badge.set_pixels(
-                        event_colors[0]["name"],
-                        event_colors[1]["name"],
-                        event_colors[2]["name"],
-                        write=True
-                    )
+        try:
+            x = requests.post(url, json=self.request)
+            resp = x.json()
+            if resp["success"]:
+                print("Updated LED status for: {}".format(self.uid))
+                print("Server response: \n{}".format(json.dumps(resp)))
+                if badge_write:
+                    event_colors = resp["leds"] if resp["event_active"] else None
+                    if resp["event_active"] and event_colors:
+                        self.badge.set_pixels(
+                            event_colors[0]["name"],
+                            event_colors[1]["name"],
+                            event_colors[2]["name"],
+                            write=True
+                        )
+                return resp
+            reason = resp["reason"] if "reason" in resp else None
+            print("Failed to update led status: {}".format(reason) if reason else "Failed to update led.")
             return resp
-        reason = resp["reason"] if "reason" in resp else None
-        print("Failed to update led status: {}".format(reason) if reason else "Failed to update led.")
-        return resp
+        except Exception as e:
+            print(f"Server didn't respond. Defaulting to something else")
+            return {"event_active": False}
 
     def fetch(self, store_file=None) -> str:
         """fetch token associated with a UID"""

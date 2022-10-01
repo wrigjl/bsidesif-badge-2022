@@ -22,7 +22,13 @@ async def launch_btn_task():
     asyncio.create_task(btn1())
     while True:
         await asyncio.sleep_ms(10000)
-        print(".")  # Required so watchdog doesn't time out
+        if __name__ == '__main__':
+            import gc
+            gc.collect()
+            mem = gc.mem_free()
+            print(f"{mem} bytes free")  # Print required so watchdog doesn't time out, so lets print memory free
+        else:
+            print(".")
 
 
 if __name__ == '__main__':

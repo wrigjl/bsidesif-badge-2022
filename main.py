@@ -5,10 +5,11 @@ import pixel
 import api
 import gc
 
-import test
+#import test
 
 # Need to reduce memory footprint to start using buttons...
 # Total bytes of memory to work with: 36,656
+# Byte values aren't exact, they're plus or minus 500 bytes or so
 # Bytes free after network / LED module 20,656 (16kb used)
 # -- Now 21,872 after some changes
 # Bytes free after using pushbutton library (test.py uses this): 12,256 (24,400kb used)
@@ -47,8 +48,8 @@ async def start_main():
     coms = api.Coms(uid, badge)
     coms.badge_init()
 
-    asyncio.create_task(test.btn1()) # see comment at top of file
-    #asyncio.create_task(start_loop(coms, badge))
+    #asyncio.create_task(test.btn1()) # see comment at top of file
+    asyncio.create_task(start_loop(coms, badge))
 
     while True:
         await asyncio.sleep_ms(5000)

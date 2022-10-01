@@ -16,7 +16,6 @@ class Coms:
         self.badge_server = badge_server if badge_server is not None else "https://ifhacker.meecles.net"
         self.auto_prediction = False
         self.custom_name = None
-        self.is_async = False
         self.prediction = []
 
     def gc(self):
@@ -26,9 +25,6 @@ class Coms:
 
     def set_url(self, url):
         self.badge_server = url
-
-    def set_async(self, is_async=True):
-        self.is_async = is_async
 
     def badge_init(self):
         token = self.fetch()
@@ -118,9 +114,6 @@ class Coms:
         """fetch token associated with a UID"""
         if self.token is not None:
             return self.token
-        if self.is_async:
-            print("[WARNING] attempting file I/O in async task")
-            return ""
         uid = self.uid
         if store_file is None:
             store_file = "tokens.json"
@@ -131,9 +124,6 @@ class Coms:
     def store(self, token, store_file=None):
         """Store received token associated with a UID"""
         uid = self.uid
-        if self.is_async:
-            print("[WARNING] attempting file I/O in async task")
-            return ""
         if store_file is None:
             store_file = "tokens.json"
         file = open(store_file, "r")

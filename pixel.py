@@ -42,7 +42,7 @@ class Badge:
 
     def colors_to_rgb(self, c1, c2, c3):
         return [
-            # Convert tuples into lists
+            # Convert tuples into lists for use with API
             [c for c in self.display_colors[c1]],
             [c for c in self.display_colors[c2]],
             [c for c in self.display_colors[c3]]

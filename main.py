@@ -57,13 +57,10 @@ async def start_main():
     coms = api.Coms(uid, badge)
     coms.badge_init()
     coms.add_prediction_state("255,128,255", "255,128,255", "255,128,255")
-    #asyncio.create_task(test.btn1())
+
+    #asyncio.create_task(test.btn1()) # see comment at top of file
     asyncio.create_task(start_loop(coms, badge))
 
-    # For some reason uncommenting this and the corresponding import
-    # causes a crash
-    # if I run test.py directly, it functions just fine.
-    # ????
     while True:
         await asyncio.sleep_ms(5000)
         gc.collect()

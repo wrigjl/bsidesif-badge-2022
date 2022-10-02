@@ -43,11 +43,11 @@ async def start_main():
     if 'wlan' not in locals():
         print(f'wlan did not exist')
         wlan = fu.conn()
-    while wlan.isconnected() == False:
-        print(f'wlan is not connected')
-        bad_juju(1)
-        wlan = fu.reconn(wlan)
-        print(f'After reconnect wlan is:{wlan.isconnected()}')
+    # while wlan.isconnected() == False:
+    #     print(f'wlan is not connected')
+    #     bad_juju(1)
+    #     wlan = fu.reconn(wlan)
+    #     print(f'After reconnect wlan is:{wlan.isconnected()}')
     uid = fu.get_uuid(wlan)
     print("My UUID: {}".format(uid))
     badge = pixel.Badge()

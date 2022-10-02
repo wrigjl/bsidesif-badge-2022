@@ -1,5 +1,5 @@
 import uasyncio as asyncio
-
+from time import sleep as bad_juju
 import funcs as fu
 import pixel
 import api
@@ -26,7 +26,6 @@ import gc
 # time to re-implement unless memory footprint of library (or my code, or both!) can be reduced by ~5kb
 # Might have to forgo short, double and long presses, and only have a basic short/long implementation
 
-
 async def start_loop(coms: api.Coms, badge: pixel.Badge):
     event_colors = None
     while True:
@@ -41,8 +40,15 @@ async def start_loop(coms: api.Coms, badge: pixel.Badge):
 
 
 async def start_main():
-    wlan = fu.conn()
-    uid = fu.get_uuid()
+    if 'wlan' not in locals():
+        print(f'wlan did not exist')
+        wlan = fu.conn()
+    while wlan.isconnected() == False:
+        print(f'wlan is not connected')
+        bad_juju(1)
+        wlan = fu.reconn(wlan)
+        print(f'After reconnect wlan is:{wlan.isconnected()}')
+    uid = fu.get_uuid(wlan)
     print("My UUID: {}".format(uid))
     badge = pixel.Badge()
     coms = api.Coms(uid, badge)

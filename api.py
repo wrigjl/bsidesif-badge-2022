@@ -1,7 +1,6 @@
 import ujson as json
 import urequests as requests
 
-
 class Coms:
 
     INGEST_ENDPOINT = "/api/ingest/{}"
@@ -13,7 +12,7 @@ class Coms:
         self.token = token
         self.badge = badge
         self.request = {}
-        self.badge_server = badge_server if badge_server is not None else "https://ifhacker.meecles.net"
+        self.badge_server = badge_server if badge_server is not None else "http://game.ifhacker.org"
         self.auto_prediction = False
         self.custom_name = None
         self.prediction = []

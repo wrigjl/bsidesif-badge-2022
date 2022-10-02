@@ -101,8 +101,10 @@ async def start_com_loop(coms: api.Coms, badge: pixel.Badge):
 def click(coms):
     print("Click button sequence!")
     response = coms.press()
-    prestates = (coms.badge.c1, coms.badge.c2, coms.badge.c3)
-    asyncio.create_task(blinkers.blink_off(coms.badge, c1=prestates[0], c2=prestates[1], c3=prestates[2]))
+    if "success" in response and response["success"]:
+        if "message" in response and "no events active" in response["message"]:
+            prestates = (coms.badge.c1, coms.badge.c2, coms.badge.c3)
+            asyncio.create_task(blinkers.blink_off(coms.badge, c1=prestates[0], c2=prestates[1], c3=prestates[2]))
 
 
 async def btn_listener(coms: api.Coms):

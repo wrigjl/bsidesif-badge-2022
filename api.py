@@ -13,7 +13,7 @@ class Coms:
         self.token = token
         self.badge = badge
         self.request = {}
-        self.badge_server = badge_server if badge_server is not None else "https://ifhacker.meecles.net"
+        self.badge_server = badge_server if badge_server is not None else "http://game.ifhacker.org"
         self.auto_prediction = False
         self.custom_name = None
         self.prediction = []
@@ -26,13 +26,22 @@ class Coms:
     def set_url(self, url):
         self.badge_server = url
 
-    def badge_init(self):
-        token = self.fetch()
-        if token is None or len(token) < 1:
-            print("No token stored, require registration")
-            token = self.register()
-        print("Loaded token!")
-        self.token = token
+    def badge_init(self, simulate_failure=False):
+        if simulate_failure:
+            print("Badge init failed! (simulation)")
+            return False
+        try:
+            token = self.fetch()
+            if token is None or len(token) < 1:
+                print("No token stored, require registration")
+                token = self.register()
+            print("Loaded token!")
+            self.token = token
+            return True
+        except Exception as e:
+            print("Badge init failed!")
+            print(e)
+            return False
 
     def register(self) -> str:
         url = "{}{}".format(self.badge_server, self.REGISTER_ENDPOINT.format(uid=self.uid))

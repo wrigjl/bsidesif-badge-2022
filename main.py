@@ -107,16 +107,42 @@ async def btn_listener(coms: api.Coms):
     await asyncio.sleep_ms(1000)
 
 
+async def blink(badge: pixel.Badge, cycles=10, c1="red", c2="red", c3="red", msg="Connection error..."):
+    """Used to blink error codes. while waiting for issue to resolve"""
+    for second in range(0, cycles):
+        badge.set_pixels(c1, c2, c3, write=True, lock_override=True)
+        await asyncio.sleep_ms(300)
+        badge.set_pixels("off", "off", "off", write=True, lock_override=True)
+        await asyncio.sleep_ms(700)
+        if second == 0 or second % 5 == 0:
+            print(msg)
+
+
 async def start_main():
-    wlan = fu.conn()
     uid = fu.get_uuid()
     print("My UUID: {}".format(uid))
     badge = pixel.Badge()
     coms = api.Coms(uid, badge, badge_server="http://game.ifhacker.org")
-    coms.badge_init()
+    try:
+        wlan = fu.conn()
+    except Exception as e:
+        print(e)
+        asyncio.run(blink(badge, cycles=5, c1="off", c3="off", msg="Error connecting to wifi"))
+        return
+    sim = False  # Set to True to simulate connection error
+    sim_counter = 3
+    while not coms.badge_init(simulate_failure=sim):
+        asyncio.run(blink(badge))
+        sim_counter -= 1
+        if sim_counter <= 0:
+            sim = False
 
+    badge.set_lock_updates()
     asyncio.create_task(start_com_loop(coms, badge))
     asyncio.create_task(btn_listener(coms))
+    asyncio.run(blink(badge, cycles=3, c1="green", c2="green", c3="green", msg="Task init success"))
+    badge.set_lock_updates(lock=False)
+
 
     while True:
         await asyncio.sleep_ms(5000)
@@ -126,4 +152,6 @@ async def start_main():
 
 
 if __name__ == '__main__':
-    asyncio.run(start_main())
+    while True:
+        asyncio.run(start_main())
+        print("Restarting main thread...")

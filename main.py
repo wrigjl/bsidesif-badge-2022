@@ -1,5 +1,7 @@
-import uasyncio as asyncio
+import secrets
 
+import uasyncio as asyncio
+import network
 import blinkers
 import funcs as fu
 import pixel
@@ -114,16 +116,39 @@ async def btn_listener(coms: api.Coms):
     await asyncio.sleep_ms(1000)
 
 
+async def start_network_testing(wlan):
+    while True:
+        if not wlan.active():
+            wlan.active(True)
+            wlan.connect(secrets.SSID, secrets.PASSWORD)
+            connect_attempts = 0
+            while not wlan.isconnected():
+                await asyncio.sleep_ms(1000)
+                connect_attempts += 1
+            print("Wifi connected!")
+        if wlan.active():
+            if not wlan.isconnected():
+                print("Wifi disconnect, attempting re-connect")
+                wlan.connect(secrets.SSID, secrets.PASSWORD)
+            else:
+                print("Wifi still active!")
+        await asyncio.sleep_ms(5000)
+        print(".")  # Need to figure out wdt.feed()
+        await asyncio.sleep_ms(5000)
+        print(".")
+
+
 async def start_main():
     uid = fu.get_uuid()
     print("My UUID: {}".format(uid))
     badge = pixel.Badge()
     coms = api.Coms(uid, badge, badge_server="http://game.ifhacker.org")
     try:
-        wlan = fu.conn()
+        wlan = network.WLAN(network.STA_IF)
+        asyncio.create_task(start_network_testing(wlan))
     except Exception as e:
         print(e)
-        asyncio.run(blinkers.blink(badge, cycles=5, c1="off", c3="off", msg="Error connecting to wifi"))
+        asyncio.run(blinkers.blink(badge, cycles=5, c1="off", c3="off", msg="Error initiating wifi"))
         return
     sim = False  # Set to True to simulate connection error
     sim_counter = 3

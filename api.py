@@ -38,6 +38,9 @@ class Coms:
             if token is None or len(token) < 1:
                 print("No token stored, require registration")
                 token = self.register()
+                if token == "":
+                    print("Failed to register token. UUID already registered?")
+                    return False
             print("Loaded token!")
             self.token = token
             return True

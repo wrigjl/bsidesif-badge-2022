@@ -112,7 +112,7 @@ async def start_main():
     uid = fu.get_uuid()
     print("My UUID: {}".format(uid))
     badge = pixel.Badge()
-    coms = api.Coms(uid, badge, badge_server="https://ifhacker.meecles.net")
+    coms = api.Coms(uid, badge, badge_server="http://game.ifhacker.org")
     coms.badge_init()
 
     asyncio.create_task(start_com_loop(coms, badge))

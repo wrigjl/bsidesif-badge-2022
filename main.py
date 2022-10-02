@@ -130,9 +130,8 @@ async def start_main():
     badge.set_lock_updates()
     asyncio.create_task(start_com_loop(coms, badge))
     asyncio.create_task(btn_listener(coms))
-    asyncio.run(blink(badge, cycles=3, c1="green", c2="green", c3="green", msg="Task init success"))
+    asyncio.run(blinkers.half_blink(badge, cycles=3, c1="green", c2="green", c3="green", msg="Task init success"))
     badge.set_lock_updates(lock=False)
-
 
     while True:
         await asyncio.sleep_ms(5000)

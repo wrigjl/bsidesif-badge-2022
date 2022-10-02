@@ -1,5 +1,6 @@
 import uasyncio as asyncio
 
+import blinkers
 import funcs as fu
 import pixel
 import api
@@ -107,17 +108,6 @@ async def btn_listener(coms: api.Coms):
     await asyncio.sleep_ms(1000)
 
 
-async def blink(badge: pixel.Badge, cycles=10, c1="red", c2="red", c3="red", msg="Connection error..."):
-    """Used to blink error codes. while waiting for issue to resolve"""
-    for second in range(0, cycles):
-        badge.set_pixels(c1, c2, c3, write=True, lock_override=True)
-        await asyncio.sleep_ms(300)
-        badge.set_pixels("off", "off", "off", write=True, lock_override=True)
-        await asyncio.sleep_ms(700)
-        if second == 0 or second % 5 == 0:
-            print(msg)
-
-
 async def start_main():
     uid = fu.get_uuid()
     print("My UUID: {}".format(uid))
@@ -127,12 +117,12 @@ async def start_main():
         wlan = fu.conn()
     except Exception as e:
         print(e)
-        asyncio.run(blink(badge, cycles=5, c1="off", c3="off", msg="Error connecting to wifi"))
+        asyncio.run(blinkers.blink(badge, cycles=5, c1="off", c3="off", msg="Error connecting to wifi"))
         return
     sim = False  # Set to True to simulate connection error
     sim_counter = 3
     while not coms.badge_init(simulate_failure=sim):
-        asyncio.run(blink(badge))
+        asyncio.run(blinkers.blink(badge))
         sim_counter -= 1
         if sim_counter <= 0:
             sim = False

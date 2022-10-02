@@ -1,9 +1,12 @@
+from uasyncio import run as async_run
+
 import ujson as json
 import urequests as requests
 
+import blinkers
+
 
 class Coms:
-
     INGEST_ENDPOINT = "/api/ingest/{}"
     REGISTER_ENDPOINT = "/api/unregister/{uid}"
     EVENT_PARTICIPATE_ENDPOINT = "/pull-lever/{uid}"
@@ -64,9 +67,15 @@ class Coms:
             self.request["token"] = token
         url = "{}{}".format(self.badge_server, self.EVENT_PARTICIPATE_ENDPOINT.format(uid=self.uid))
         print("Request: \n{}".format(json.dumps(self.request)))
-        x = requests.get(url, json=self.request)
-        resp = x.json()
-        print("Response: \n{}".format(json.dumps(resp)))
+        try:
+            x = requests.get(url, json=self.request)
+            resp = x.json()
+            print("Response: \n{}".format(json.dumps(resp)))
+            resp["code"] = 0
+            return resp
+        except Exception as e:
+            pass
+        return {"success": False, "code": 1}
 
     def update_led_state(self, led0: list, led1: list, led2: list, badge_write=False, web_write=False):
         """LED Format [r: int, g: int, b: int]"""

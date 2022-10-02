@@ -10,6 +10,8 @@ from machine import Pin
 
 async def _g():
     pass
+
+
 type_coro = type(_g())
 
 
@@ -98,7 +100,9 @@ async def start_com_loop(coms: api.Coms, badge: pixel.Badge):
 
 def click(coms):
     print("Click button sequence!")
-    coms.press()
+    response = coms.press()
+    prestates = (coms.badge.c1, coms.badge.c2, coms.badge.c3)
+    asyncio.create_task(blinkers.blink_off(coms.badge, c1=prestates[0], c2=prestates[1], c3=prestates[2]))
 
 
 async def btn_listener(coms: api.Coms):
@@ -128,9 +132,14 @@ async def start_main():
             sim = False
 
     badge.set_lock_updates()
+
+    blue = (0, 0, 25)
+    badge.secret_write(blue, blue, blue)
+
     asyncio.create_task(start_com_loop(coms, badge))
     asyncio.create_task(btn_listener(coms))
     asyncio.run(blinkers.half_blink(badge, cycles=3, c1="green", c2="green", c3="green", msg="Task init success"))
+    badge.secret_write(blue, blue, blue)
     badge.set_lock_updates(lock=False)
 
     while True:

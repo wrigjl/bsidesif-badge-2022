@@ -62,6 +62,12 @@ class Badge:
         if write:
             self.write_pixels(lock_override=lock_override)
 
+    def secret_write(self, c1, c2, c3):
+        self.np[0] = c1
+        self.np[1] = c2
+        self.np[2] = c3
+        self.np.write()
+
     def write_pixels(self, lock_override=False):
         if self.lock_updates and not lock_override:
             return

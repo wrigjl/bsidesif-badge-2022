@@ -42,7 +42,7 @@ class Badge:
             n = 0
             for color in self.display_colors:
                 if r == n:
-                    yield color
+                    yield color if color != "off" else "teal"
                 n += 1
 
     def colors_to_rgb(self, c1, c2, c3):

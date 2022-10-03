@@ -1,9 +1,6 @@
-from uasyncio import run as async_run
-
 import ujson as json
 import urequests as requests
-
-import blinkers
+import funcs as fu
 
 
 class Coms:
@@ -29,9 +26,9 @@ class Coms:
     def set_url(self, url):
         self.badge_server = url
 
-    def badge_init(self, simulate_failure=False):
+    def badge_init(self, simulate_failure=False, init_attempt=0):
         if simulate_failure:
-            print("Badge init failed! (simulation)")
+            print(f"Badge init failed! (simulation) {init_attempt}")
             return False
         try:
             token = self.fetch()
@@ -47,18 +44,21 @@ class Coms:
         except Exception as e:
             print("Badge init failed!")
             print(e)
-            return False
+        return False
 
     def register(self) -> str:
         url = "{}{}".format(self.badge_server, self.REGISTER_ENDPOINT.format(uid=self.uid))
+        fu.wdt.feed()
         x = requests.post(url)
         resp = x.json()
         if "success" not in resp or not resp["success"]:
             return ""
         if "token" not in resp:
             return ""
+        fu.wdt.feed()
         print("Self-registered and saved API token for badge id: {}".format(self.uid))
         self.store(resp["token"])
+        fu.wdt.feed()
         return resp["token"]
 
     def press(self):
@@ -97,6 +97,7 @@ class Coms:
         self._add_prediction()
         self._add_name()
         print("Stored LED state")
+        fu.wdt.feed()
         if web_write:
             return self.write_led_state(badge_write=badge_write)
         return {}
@@ -105,7 +106,10 @@ class Coms:
         url = "{}{}".format(self.badge_server, self.INGEST_ENDPOINT.format(self.uid))
         print("Request: \n{}".format(json.dumps(self.request)))
         try:
+            fu.wdt.feed()
+            # Because of watchdog, if this takes too long, the badge will reset
             x = requests.post(url, json=self.request)
+            fu.wdt.feed()
             resp = x.json()
             print(resp)
             if resp["success"]:
@@ -127,6 +131,7 @@ class Coms:
             self.gc()
             return resp
         except Exception as e:
+            fu.wdt.feed()
             print(f"Server didn't respond. Defaulting to something else")
             self.gc()
             return {"event_active": False}

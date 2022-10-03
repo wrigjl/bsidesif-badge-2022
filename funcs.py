@@ -1,10 +1,66 @@
 import network
 import ubinascii
-from machine import Pin
+import machine
 
 import secrets
 
-button_pin = Pin(0)
+button_pin = machine.Pin(0)
+
+
+def rst_cause(verbose=False):
+    c = machine.reset_cause()
+    if not verbose:
+        return c
+    if c == machine.PWRON_RESET:
+        print(f"Power reboot {c}")
+    elif c == machine.WDT_RESET:
+        print(f"WDT reset {c}")
+    elif c == 2:
+        print(f"Fatal exception reset {c}")
+    elif c == 3:
+        print(f"WDT reset {c}")
+    elif c == machine.SOFT_RESET:
+        print(f"Soft reset {c}")
+    elif c == machine.DEEPSLEEP_RESET:
+        print(f"Deepsleep reset {c}")
+    elif c == machine.HARD_RESET:
+        print(f"Hard reset {c}")
+    else:
+        print(f"Unknown reset: {c}")
+    return c  # Different actions depending on reset?
+
+
+class WrapWDT:
+
+    def __init__(self, disabled=False):
+        self.disabled = disabled
+        self.wdt = None
+
+    def feed(self):
+        if not self.disabled:
+            self.wdt.feed()
+
+    def launch(self):
+        self.wdt = machine.WDT()
+        self.disabled = False
+        self.feed()
+
+
+wdt = WrapWDT(disabled=True)
+
+
+def init_watchdog():
+    cause = rst_cause()
+    launch = cause != 1
+    # Launch if not a hardware WDT reset
+    # HW WDT will still be enabled, Software disabled.
+    print("\n\n")
+    print("Launching software watchdog" if launch else "Skipping software watchdog launch")
+    global wdt
+    if launch:
+        wdt.launch()
+        wdt.feed()
+
 
 # Updating neopixel values has been moved to pixel.py
 

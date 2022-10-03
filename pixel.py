@@ -26,7 +26,6 @@ class Badge:
         divis = 5
         return int(color[0] / divis), int(color[1] / divis), int(color[2] / divis)
 
-
     def set_lock_updates(self, lock=True):
         self.lock_updates = lock
 

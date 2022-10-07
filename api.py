@@ -3,8 +3,12 @@ from uasyncio import run as async_run
 import ujson as json
 import urequests as requests
 
+<<<<<<< HEAD
 import blinkers
 
+=======
+class Coms:
+>>>>>>> main
 
 class Coms:
     INGEST_ENDPOINT = "/api/ingest/{}"

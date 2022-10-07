@@ -97,7 +97,7 @@ async def start_com_loop(coms: api.Coms, badge: pixel.Badge):
         if not response["event_active"]:
             badge.write_pixels()
             event_colors = response["leds"] if response["event_active"] else None
-        await asyncio.sleep_ms(5000)
+        await asyncio.sleep_ms(30000)
 
 
 def click(coms):

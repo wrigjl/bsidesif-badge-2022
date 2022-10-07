@@ -80,3 +80,4 @@ class Badge:
         for i in range(numpix):
             self.np[i] = (0, 0, 0)
         self.np.write()
+

@@ -97,7 +97,7 @@ async def start_com_loop(coms: api.Coms, badge: pixel.Badge):
         if not response["event_active"]:
             badge.write_pixels()
             event_colors = response["leds"] if response["event_active"] else None
-        await asyncio.sleep_ms(30000)
+        await asyncio.sleep_ms(5000)
 
 
 def click(coms):
@@ -180,3 +180,4 @@ if __name__ == '__main__':
     while True:
         asyncio.run(start_main())
         print("Restarting main thread...")
+

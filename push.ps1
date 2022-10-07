@@ -31,7 +31,7 @@ if ($Json) {
 }
 
 Write-Host "About to copy python code to $DEVICE"
-$files = 'funcs.py', 'api.py', 'pixel.py', 'main.py', 'spectre.py'
+$files = 'blinkers.py', 'funcs.py', 'api.py', 'pixel.py', 'main.py', 'spectre.py'
 foreach ($file in $files) {
   Write-Host "= pushing $file"
   if ($DEBUG) { Write-Host "ampy --port $DEVICE put $file" }

@@ -186,3 +186,4 @@ class Coms:
     def _add_name(self):
         if self.custom_name:
             self.request["name"] = self.custom_name
+

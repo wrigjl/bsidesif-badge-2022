@@ -9,7 +9,9 @@ button_pin = Pin(0)
 # Updating neopixel values has been moved to pixel.py
 
 
-def get_uuid(wlan_sta):
+def get_uuid():
+    wlan_sta = network.WLAN(network.STA_IF)
+    wlan_sta.active(True)
     wlan_mac = wlan_sta.config('mac')
     mac = ubinascii.hexlify(wlan_mac).decode()
     return "ebc626d8-6ddb-437c-8210-{}".format(mac)
@@ -19,11 +21,7 @@ def conn():
     wlan = network.WLAN(network.STA_IF)
     wlan.active(True)
     wlan.connect(secrets.SSID, secrets.PASSWORD)
-    return wlan
-
-def reconn(wlan):
-    wlan.connect(secrets.SSID, secrets.PASSWORD)
-    print(f'Wifi connection is: {wlan.isconnected()}')
+    # print(wlan.isconnected())
     return wlan
 
 
@@ -35,3 +33,4 @@ def reconn(wlan):
 #         time.sleep(.25)
 #         pin_num.on()
 #         time.sleep(.25)
+

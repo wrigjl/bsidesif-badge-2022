@@ -180,3 +180,4 @@ if __name__ == '__main__':
     while True:
         asyncio.run(start_main())
         print("Restarting main thread...")
+

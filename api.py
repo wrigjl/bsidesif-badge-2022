@@ -1,8 +1,12 @@
+from uasyncio import run as async_run
+
 import ujson as json
 import urequests as requests
 
-class Coms:
+import blinkers
 
+
+class Coms:
     INGEST_ENDPOINT = "/api/ingest/{}"
     REGISTER_ENDPOINT = "/api/unregister/{uid}"
     EVENT_PARTICIPATE_ENDPOINT = "/pull-lever/{uid}"
@@ -25,13 +29,25 @@ class Coms:
     def set_url(self, url):
         self.badge_server = url
 
-    def badge_init(self):
-        token = self.fetch()
-        if token is None or len(token) < 1:
-            print("No token stored, require registration")
-            token = self.register()
-        print("Loaded token!")
-        self.token = token
+    def badge_init(self, simulate_failure=False):
+        if simulate_failure:
+            print("Badge init failed! (simulation)")
+            return False
+        try:
+            token = self.fetch()
+            if token is None or len(token) < 1:
+                print("No token stored, require registration")
+                token = self.register()
+                if token == "":
+                    print("Failed to register token. UUID already registered?")
+                    return False
+            print("Loaded token!")
+            self.token = token
+            return True
+        except Exception as e:
+            print("Badge init failed!")
+            print(e)
+            return False
 
     def register(self) -> str:
         url = "{}{}".format(self.badge_server, self.REGISTER_ENDPOINT.format(uid=self.uid))
@@ -54,9 +70,15 @@ class Coms:
             self.request["token"] = token
         url = "{}{}".format(self.badge_server, self.EVENT_PARTICIPATE_ENDPOINT.format(uid=self.uid))
         print("Request: \n{}".format(json.dumps(self.request)))
-        x = requests.get(url, json=self.request)
-        resp = x.json()
-        print("Response: \n{}".format(json.dumps(resp)))
+        try:
+            x = requests.get(url, json=self.request)
+            resp = x.json()
+            print("Response: \n{}".format(json.dumps(resp)))
+            resp["code"] = 0
+            return resp
+        except Exception as e:
+            pass
+        return {"success": False, "code": 1}
 
     def update_led_state(self, led0: list, led1: list, led2: list, badge_write=False, web_write=False):
         """LED Format [r: int, g: int, b: int]"""

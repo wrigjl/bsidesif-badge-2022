@@ -39,6 +39,7 @@ echo "Starting copy to $DEVICE"
 ampy --port $DEVICE put funcs.py
 ampy --port $DEVICE put api.py
 ampy --port $DEVICE put pixel.py
+ampy --port $DEVICE put blinkers.py
 # ampy --port $DEVICE put tokens.json  # Uncomment first time you push, then re-comment
 # alternatively you can hand-run that command once
 ampy --port $DEVICE put main.py

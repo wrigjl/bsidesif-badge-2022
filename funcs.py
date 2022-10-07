@@ -1,10 +1,10 @@
 import network
 import ubinascii
-# from machine import Pin
+from machine import Pin
 
 import secrets
 
-# button_pin = Pin(0)
+button_pin = Pin(0)
 
 # Updating neopixel values has been moved to pixel.py
 
